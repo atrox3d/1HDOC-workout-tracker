@@ -1,7 +1,7 @@
 import myob
 import requests
 import json
-from datetime import datetime as dt
+import datetime as dt
 
 NUTRITIONIX_APPID = myob.NUTRITIONIX_APPID
 NUTRITIONIX_APPKEY = myob.NUTRITIONIX_APPKEY
@@ -41,11 +41,29 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
 
 def update_sheety(exercise: dict) -> requests.models.Response:
     # print(json.dumps(exercise, indent=4))
-    time_iso = dt.now().time()
-    now_time = ((time_iso.hour + ((time_iso.minute + (time_iso.second / 60.0)) / 60.0)) / 24.0)
+    time_iso = dt.datetime.now().time()
+    now_time = (time_iso.hour + ((time_iso.minute + (time_iso.second / 60.0)) / 60.0)) / 24.0
+    #
+    # or
+    #
+    now_time = time_iso.hour / 24.0 + \
+               time_iso.minute / 60.0 + \
+               time_iso.second / 60.0
+    #
+    # or
+    #
+    td = dt.timedelta(
+        hours=time_iso.hour,
+        minutes=time_iso.minute,
+        seconds=time_iso.second,
+        microseconds=time_iso.microsecond
+    )
+    SECONDS_IN_A_DAY = 24 * 60 * 60
+    now_time = td.seconds / SECONDS_IN_A_DAY
+
     payload = {
         "workout": {
-            "date": dt.strftime(dt.now(), "%Y%m%d"),
+            "date": dt.datetime.strftime(dt.datetime.now(), "%Y%m%d"),
             # "time": dt.strftime(dt.now(), "%H:%M:%S %p"),
             # "time": dt.strftime(dt.now(), "%X"),
             "time": now_time,
