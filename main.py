@@ -44,13 +44,14 @@ def update_sheety(exercise: dict) -> requests.models.Response:
     payload = {
         "workout": {
             "date": dt.strftime(dt.now(), "%Y%m%d"),
-            "time": dt.strftime(dt.now(), "%H:%M:%S %p"),
+            # "time": dt.strftime(dt.now(), "%H:%M:%S %p"),
+            "time": dt.strftime(dt.now(), "%X"),
             "exercise": exercise["name"],
             "duration": exercise["duration_min"],
             "calories": exercise["nf_calories"],
         }
     }
-    print(payload)
+    print("payload: ", payload)
     response = requests.post(SHEETY_ENDPOINT, json=payload)
     return response
 
@@ -60,6 +61,6 @@ nutritionix_response = query_nutritionix()
 nutritionix_data = nutritionix_response.json()
 
 for exercise in nutritionix_data["exercises"]:
-    response = update_sheety(exercise)
-    print(response.status_code)
-    print(response.text)
+    sheety_response = update_sheety(exercise)
+    print("status code: ", sheety_response.status_code)
+    print("response text: ", sheety_response.text)
