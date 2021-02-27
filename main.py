@@ -40,17 +40,25 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
 
 
 def update_sheety(exercise: dict) -> requests.models.Response:
-    # print(json.dumps(exercise, indent=4))
     time_iso = dt.datetime.now().time()
-    now_time = (time_iso.hour + ((time_iso.minute + (time_iso.second / 60.0)) / 60.0)) / 24.0
     #
-    # or
+    #   too convoluted
+    #   https://gist.github.com/angelabauer/164864b78175bb1ecd3d3fd7f4ee39b7#gistcomment-3596417
+    #
+    now_time = ((time_iso.hour + ((time_iso.minute + (time_iso.second / 60.0)) / 60.0)) / 24.0)
+    #
+    # or simpler
+    # https://stackoverflow.com/a/39536110
+    # https://stackoverflow.com/a/9574948
+    # https://stackoverflow.com/a/42230265
+    # https://developers.google.com/sheets/api/guides/concepts#datetime_serial_numbers
     #
     now_time = time_iso.hour / 24.0 + \
                time_iso.minute / 60.0 + \
                time_iso.second / 60.0
     #
-    # or
+    # or BETTER
+    # https://stackoverflow.com/a/19813554
     #
     td = dt.timedelta(
         hours=time_iso.hour,
