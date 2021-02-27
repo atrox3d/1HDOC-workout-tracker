@@ -41,11 +41,14 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
 
 def update_sheety(exercise: dict) -> requests.models.Response:
     # print(json.dumps(exercise, indent=4))
+    time_iso = dt.now().time()
+    now_time = ((time_iso.hour + ((time_iso.minute + (time_iso.second / 60.0)) / 60.0)) / 24.0)
     payload = {
         "workout": {
             "date": dt.strftime(dt.now(), "%Y%m%d"),
             # "time": dt.strftime(dt.now(), "%H:%M:%S %p"),
-            "time": dt.strftime(dt.now(), "%X"),
+            # "time": dt.strftime(dt.now(), "%X"),
+            "time": now_time,
             "exercise": exercise["name"],
             "duration": exercise["duration_min"],
             "calories": exercise["nf_calories"],
