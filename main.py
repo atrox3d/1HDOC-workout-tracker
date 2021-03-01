@@ -51,8 +51,8 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
     return response
 
 
-def update_sheety(exercise: dict) -> requests.models.Response:
-    update_sheety.SECONDS_IN_A_DAY = 24 * 60 * 60
+def get_timesheet_time(time_iso=dt.datetime.now()):
+    get_timesheet_time.SECONDS_IN_A_DAY = 24 * 60 * 60
     time_iso = dt.datetime.now().time()
     #
     #   too convoluted
@@ -79,14 +79,16 @@ def update_sheety(exercise: dict) -> requests.models.Response:
         seconds=time_iso.second,
         microseconds=time_iso.microsecond
     )
-    now_time = td.seconds / update_sheety.SECONDS_IN_A_DAY
+    now_time = td.seconds / get_timesheet_time.SECONDS_IN_A_DAY
 
+
+def update_sheety(exercise: dict) -> requests.models.Response:
     payload = {
         "workout": {
             "date": dt.datetime.strftime(dt.datetime.now(), "%Y%m%d"),
             # "time": dt.strftime(dt.now(), "%H:%M:%S %p"),
             # "time": dt.strftime(dt.now(), "%X"),
-            "time": now_time,
+            "time": get_timesheet_time(dt.datetime.now()),
             "exercise": exercise["name"],
             "duration": exercise["duration_min"],
             "calories": exercise["nf_calories"],
@@ -108,14 +110,14 @@ def update_sheety(exercise: dict) -> requests.models.Response:
 
 ################################################################################
 while True:
-    query = input("\n\n\n\nTell me wich exercises you did: ")
+    input_query = input("\n\n\n\nTell me wich exercises you did: ")
 
-    nutritionix_response = query_nutritionix(query)
+    nutritionix_response = query_nutritionix(input_query)
     nutritionix_data = nutritionix_response.json()
 
     for currrent_exercise in nutritionix_data["exercises"]:
         sheety_response = update_sheety(currrent_exercise)
 
     print("*" * 80)
-    print(f"last query: '{query}'")
+    print(f"last query: '{input_query}'")
     print("*" * 80)
