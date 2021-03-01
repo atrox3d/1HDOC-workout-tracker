@@ -13,6 +13,19 @@ SHEETY_SHEET = myob.SHEETY_SHEET
 SHEETY_ENDPOINT = f"https://api.sheety.co/{SHEETY_USER}/{SHEETY_PROJECT}/{SHEETY_SHEET}"
 
 
+class Auth:
+    BASIC = "Basic"
+    BEARER = "Bearer"
+    NONE = None
+
+
+# auth
+SHEETY_AUTH_USERNAME = myob.SHEETY_AUTH_USERNAME
+SHEETY_AUTH_PASSWORD = myob.SHEETY_AUTH_PASSWORD
+SHEETY_AUTH_BEARERTOKEN = myob.SHEETY_AUTH_BEARERTOKEN
+SHEETY_AUTH_TYPE = Auth.BEARER
+
+
 def ASCII_ROW(char="-", width=80):
     print(char * width)
 
@@ -79,6 +92,7 @@ def get_timesheet_time(time_iso=dt.datetime.now()):
         microseconds=time_iso.microsecond
     )
     now_time = td.seconds / get_timesheet_time.SECONDS_IN_A_DAY
+    return now_time
 
 
 def update_sheety(exercise: dict) -> requests.models.Response:
@@ -96,13 +110,38 @@ def update_sheety(exercise: dict) -> requests.models.Response:
     ASCII_ROW("#")
     print("google payload: ", payload)
     ASCII_ROW("#")
-    response = requests.post(SHEETY_ENDPOINT, json=payload)
-
-    print("google status code       : ", response.status_code)
-    print("-" * 80)
-    print("GOOGLE RESPONSE")
-    print("-" * 80)
-    print("google response text     : ", response.text)
+    if SHEETY_AUTH_TYPE == Auth.BASIC:
+        # basic authentication
+        print("[BASIC AUTHENTICATION]")
+        auth = (SHEETY_AUTH_USERNAME, SHEETY_AUTH_PASSWORD)
+        print("auth: ", auth)
+        response = requests.post(SHEETY_ENDPOINT, json=payload, auth=auth)
+    elif SHEETY_AUTH_TYPE == Auth.BEARER:
+        # bearer token authentication
+        print("[BEARER AUTHENTICATION]")
+        headers = {
+            "Authorization": f"Bearer {SHEETY_AUTH_BEARERTOKEN}",
+            "Content-Type": "application/json",
+        }
+        print("headers: ", headers)
+        response = requests.post(SHEETY_ENDPOINT, json=payload, headers=headers)
+    else:
+        # no authentication
+        response = requests.post(SHEETY_ENDPOINT, json=payload)
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')  # Python 3.6
+    except Exception as err:
+        print(f'Other error occurred: {err}')  # Python 3.6
+    else:
+        print('Success!')
+    finally:
+        print("sheety status code       : ", response.status_code)
+        print("-" * 80)
+        print("SHEETY RESPONSE")
+        print("-" * 80)
+        print("sheety response text     : ", response.text)
 
     return response
 
