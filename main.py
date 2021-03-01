@@ -22,13 +22,16 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
     params = {
         # "query": "ran 3 miles",
         "query": "swam 40 min and ran 3km and 30 min pushups",
-        "gender": "male",
-        "weight_kg": 98,
-        "height_cm": 170.0,
-        "age": 50
+        "gender": "female",
+        "weight_kg": 50,
+        "height_cm": 154.0,
+        "age": 38
     }
     if query:
         params["query"] = query
+
+    print("query: ", json.dumps(params, indent=4))
+    print("#" * 80)
 
     response = requests.post(url=NUTRITIONIX_ENDPOINT, json=params, headers=headers)
     print(response.status_code)
@@ -86,10 +89,26 @@ def update_sheety(exercise: dict) -> requests.models.Response:
 
 
 ################################################################################
-nutritionix_response = query_nutritionix()
-nutritionix_data = nutritionix_response.json()
+while True:
+    query = input("\n\n\n\nciao, cosa hai fatto: ")
 
-for exercise in nutritionix_data["exercises"]:
-    sheety_response = update_sheety(exercise)
-    print("status code: ", sheety_response.status_code)
-    print("response text: ", sheety_response.text)
+    nutritionix_response = query_nutritionix(query)
+    nutritionix_data = nutritionix_response.json()
+    print("-" * 80)
+    print("RISPOSTA NUTRITIONIX")
+    print("-" * 80)
+    print(json.dumps(nutritionix_data, indent=4))
+    print("#" * 80)
+
+    for exercise in nutritionix_data["exercises"]:
+        sheety_response = update_sheety(exercise)
+        print("-" * 80)
+        print("RISPOSTA GOOGLE")
+        print("-" * 80)
+        print("status code: ", sheety_response.status_code)
+        print("response text: ", sheety_response.text)
+
+    print("*" * 80)
+    print(query)
+    print("*" * 80)
+
