@@ -13,6 +13,10 @@ SHEETY_SHEET = myob.SHEETY_SHEET
 SHEETY_ENDPOINT = f"https://api.sheety.co/{SHEETY_USER}/{SHEETY_PROJECT}/{SHEETY_SHEET}"
 
 
+def ASCII_ROW(char="-", width=80):
+    print(char * width)
+
+
 def query_nutritionix(query: str = None) -> requests.models.Response:
     headers = {
         "x-app-id": NUTRITIONIX_APPID,
@@ -27,22 +31,28 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
         "height_cm": 154.0,
         "age": 38
     }
+    # if query from input is None use default in dict
     if query:
         params["query"] = query
 
-    print("query: ", json.dumps(params, indent=4))
-    print("#" * 80)
+    ASCII_ROW("#")
+    # print("nutritionix query: ", json.dumps(params, indent=4))
+    print("nutritionix payload      : ", params)
+    ASCII_ROW("#")
 
     response = requests.post(url=NUTRITIONIX_ENDPOINT, json=params, headers=headers)
-    print(response.status_code)
-    # print(type(response))
-    # data = response.json()
-    # print(type(data))
-    # print(json.dumps(data, indent=4))
+
+    print("nutritionix status code  : ", response.status_code)
+    ASCII_ROW()
+    print("NUTRINIONIX RESPONSE")
+    ASCII_ROW()
+    print("nutritionix response data: ", json.dumps(response.json(), indent=4))
+
     return response
 
 
 def update_sheety(exercise: dict) -> requests.models.Response:
+    update_sheety.SECONDS_IN_A_DAY = 24 * 60 * 60
     time_iso = dt.datetime.now().time()
     #
     #   too convoluted
@@ -69,8 +79,7 @@ def update_sheety(exercise: dict) -> requests.models.Response:
         seconds=time_iso.second,
         microseconds=time_iso.microsecond
     )
-    SECONDS_IN_A_DAY = 24 * 60 * 60
-    now_time = td.seconds / SECONDS_IN_A_DAY
+    now_time = td.seconds / update_sheety.SECONDS_IN_A_DAY
 
     payload = {
         "workout": {
@@ -83,32 +92,30 @@ def update_sheety(exercise: dict) -> requests.models.Response:
             "calories": exercise["nf_calories"],
         }
     }
-    print("payload: ", payload)
+    ASCII_ROW("#")
+    print("google payload: ", payload)
+    ASCII_ROW("#")
     response = requests.post(SHEETY_ENDPOINT, json=payload)
+
+    print("google status code       : ", response.status_code)
+    print("-" * 80)
+    print("GOOGLE RESPONSE")
+    print("-" * 80)
+    print("google response text     : ", response.text)
+
     return response
 
 
 ################################################################################
 while True:
-    query = input("\n\n\n\nciao, cosa hai fatto: ")
+    query = input("\n\n\n\nTell me wich exercises you did: ")
 
     nutritionix_response = query_nutritionix(query)
     nutritionix_data = nutritionix_response.json()
-    print("-" * 80)
-    print("RISPOSTA NUTRITIONIX")
-    print("-" * 80)
-    print(json.dumps(nutritionix_data, indent=4))
-    print("#" * 80)
 
-    for exercise in nutritionix_data["exercises"]:
-        sheety_response = update_sheety(exercise)
-        print("-" * 80)
-        print("RISPOSTA GOOGLE")
-        print("-" * 80)
-        print("status code: ", sheety_response.status_code)
-        print("response text: ", sheety_response.text)
+    for currrent_exercise in nutritionix_data["exercises"]:
+        sheety_response = update_sheety(currrent_exercise)
 
     print("*" * 80)
-    print(query)
+    print(f"last query: '{query}'")
     print("*" * 80)
-
