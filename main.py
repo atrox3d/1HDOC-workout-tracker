@@ -23,7 +23,7 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
         "x-app-key": NUTRITIONIX_APPKEY
     }
 
-    params = {
+    payload = {
         # "query": "ran 3 miles",
         "query": "swam 40 min and ran 3km and 30 min pushups",
         "gender": "female",
@@ -33,14 +33,13 @@ def query_nutritionix(query: str = None) -> requests.models.Response:
     }
     # if query from input is None use default in dict
     if query:
-        params["query"] = query
+        payload["query"] = query
 
     ASCII_ROW("#")
-    # print("nutritionix query: ", json.dumps(params, indent=4))
-    print("nutritionix payload      : ", params)
+    print("nutritionix payload      : ", payload)
     ASCII_ROW("#")
 
-    response = requests.post(url=NUTRITIONIX_ENDPOINT, json=params, headers=headers)
+    response = requests.post(url=NUTRITIONIX_ENDPOINT, json=payload, headers=headers)
 
     print("nutritionix status code  : ", response.status_code)
     ASCII_ROW()
