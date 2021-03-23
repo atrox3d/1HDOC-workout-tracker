@@ -1,7 +1,10 @@
-import myob
 import requests
 import json
 import datetime as dt
+# import myob
+import util.parentimport
+util.parentimport.add_parent_import()
+from _myob.workout_tracker import myob
 
 NUTRITIONIX_APPID = myob.NUTRITIONIX_APPID
 NUTRITIONIX_APPKEY = myob.NUTRITIONIX_APPKEY
